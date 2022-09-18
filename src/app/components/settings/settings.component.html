@@ -1,1 +1,24 @@
-<p>settings works!</p>
+<div calss="settings-container">
+    <div *ngIf="settingsForm" class="settings-container">
+        <form [formGroup]="settingsForm" (ngSubmit)="onSubmit()">
+            <mat-form-field appearance="outline">
+                <mat-label>work %:</mat-label>
+                <input matInput formControlName="workPercent">
+            </mat-form-field>
+            <mat-form-field appearance="outline">
+                <mat-label>rest %:</mat-label>
+                <input matInput formControlName="restPercent">
+            </mat-form-field>
+            <br>
+            <mat-form-field appearance="outline">
+                <mat-label>max session time:</mat-label>
+                <input matInput formControlName="maxSessionTime">
+            </mat-form-field>
+            <div>
+                <button mat-button color="primary" type="submit" [disabled]="!isFormValid()">
+                    save
+                </button>
+            </div>
+        </form>
+    </div>
+</div>

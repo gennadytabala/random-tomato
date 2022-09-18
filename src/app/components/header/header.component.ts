@@ -12,4 +12,9 @@ export class HeaderComponent implements OnInit {
   ngOnInit(): void {
   }
 
+  onSettingsButtonClick(){
+    console.log('onSettingsButtonClick()'); //todo
+      
+  }
+
 }

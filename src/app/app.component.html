@@ -1,1 +1,20 @@
-<h1>App</h1>
+<app-header></app-header>
+<mat-sidenav-container class="full-height-container">
+    <mat-sidenav 
+        #sidenav 
+        mode="side" 
+        class="content-padding" 
+        position="end"
+        [fixedInViewport]="true" 
+        [fixedTopGap]="80"
+        [fixedBottomGap]="0" 
+        [opened]="false">
+        <app-settings></app-settings>
+    </mat-sidenav>
+    <mat-sidenav-content>
+        <div class="content-padding">
+            <app-board></app-board>
+        </div>
+    </mat-sidenav-content>
+
+</mat-sidenav-container>

@@ -1,1 +1,24 @@
-<p>board works!</p>
+<button mat-button>
+    start
+</button>
+<button mat-button>
+    pause
+</button>
+<button mat-button>
+    stop
+</button>
+
+<mat-card>
+    <mat-card-title>
+        do
+    </mat-card-title>
+    <mat-progress-bar [style.width.%]="80"
+        mode = "determinate" 
+        value = "50" 
+        color = "warn" 
+    >
+    </mat-progress-bar>
+    <br>
+    <mat-divider [inset]="true"></mat-divider>
+    
+</mat-card>
