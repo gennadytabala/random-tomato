@@ -1,5 +1,5 @@
 import { Component, OnInit } from '@angular/core';
-import { BroadcastService, EventKeys } from 'src/app/services/broadcast.service';
+import { BroadcastService, EventKeys } from 'src/app/services/broadcast/broadcast.service';
 
 @Component({
   selector: 'app-header',

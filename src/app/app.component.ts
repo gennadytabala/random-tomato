@@ -1,6 +1,6 @@
 import { Component, ViewChild } from '@angular/core';
 import { MatSidenav } from '@angular/material/sidenav';
-import { BroadcastService, EventKeys } from './services/broadcast.service';
+import { BroadcastService, EventKeys } from './services/broadcast/broadcast.service';
 
 @Component({
   selector: 'app-root',
