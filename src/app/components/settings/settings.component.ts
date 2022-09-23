@@ -3,6 +3,7 @@ import { FormBuilder, FormControl, FormGroup, Validators } from '@angular/forms'
 import { ISettings } from 'src/app/modules/interfaces/interfaces';
 import { BroadcastService, EventKeys } from 'src/app/services/broadcast/broadcast.service';
 import { ControllerService } from 'src/app/services/controller/controller.service';
+import { DefaultsService } from 'src/app/services/defaults/defaults.service';
 
 @Component({
   selector: 'app-settings',
@@ -11,27 +12,53 @@ import { ControllerService } from 'src/app/services/controller/controller.servic
 })
 export class SettingsComponent implements OnInit {
 
+  private _settings:ISettings
   settingsForm: FormGroup | null = null
 
   constructor(
     private formBuilder:FormBuilder,
     private controller:ControllerService,
-    private broadcastService:BroadcastService
-  ) { }
+    private broadcastService:BroadcastService,
+    private defaults:DefaultsService
+  ) { 
+    this._settings = this.defaults.settings
+    this.updateSettings = this.updateSettings.bind(this)
+    this.broadcastService.on(EventKeys.SETTINGS_CHANGED).subscribe(this.updateSettings)
+  }
 
   ngOnInit(): void {
     this.buildForm()
   }
 
+  setDefault(){
+    this.updateSettings(this.defaults.settings)  
+  }
+
+  updateSettings(settings:ISettings) {
+    const formState = {
+      workPercent: {
+        value: settings.workPercent,
+        disabled:false
+      },
+      restPercent: {
+        value: settings.restPercent,
+        disabled:false
+      },
+      maxSessionTime: {
+        value: settings.maxSessionTime,
+        disabled:false
+      },
+    }
+    this.settingsForm?.reset(formState)
+  } 
+
   onSubmit() {
-    console.log("onSubmit()");
     const settings: ISettings = {
       workPercent: +(this.settingsForm?.value.workPercent),
       restPercent: +(this.settingsForm?.value.restPercent),
       maxSessionTime:  +(this.settingsForm?.value.maxSessionTime)
     }
     this.broadcastService.broadcast(EventKeys.SETTINGS_SAVE_CLICKED, settings)
-    this.broadcastService.broadcast(EventKeys.SETTINGS_BUTTON_CLICKED, "")
   }
 
   isFormValid() {
@@ -46,7 +73,7 @@ export class SettingsComponent implements OnInit {
       maxSessionTime: new FormControl({},Validators.required), 
     }
 
-    const settings = this.controller.settings
+    const settings = this.controller.getSettings()
     
     const formState = {
       workPercent: {
