@@ -10,6 +10,7 @@ export class DefaultsService {
   public sessionType = SessionType.WORK
   public sessionStatus = SessionStatus.STOPPED
   public sessionProgress = 0
+  public tick = 1000
 
   public settings: ISettings = {
     maxSessionTime:30,
