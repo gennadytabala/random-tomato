@@ -22,6 +22,11 @@ export class StorageService {
     })
   }
 
+  deleteCurrentSession(): void {
+    localStorage.removeItem(StorageKeys.CURRENT_SESSION)
+  }
+
+
   getCurrentSession() {
     const currentSessionStr: string | null = localStorage.getItem(StorageKeys.CURRENT_SESSION)
     if(currentSessionStr){

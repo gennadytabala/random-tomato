@@ -1,5 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { ISession, SessionStatus, SessionType } from 'src/app/modules/interfaces/interfaces';
+import { BroadcastService, EventKeys } from 'src/app/services/broadcast/broadcast.service';
 import { ControllerService } from 'src/app/services/controller/controller.service';
 
 interface ICurrentSession extends ISession {
@@ -41,16 +42,48 @@ export class BoardComponent implements OnInit {
   currentSession: ICurrentSession
 
   constructor(
-    private controller: ControllerService
+    private controller: ControllerService,
+    private broadcastService: BroadcastService
   ) {
 
     const session = this.controller.getCurrentSession()
     this.currentSession = new CurrentSession(session)
 
+    this.increaseProgress = this.increaseProgress.bind(this)
+    this.broadcastService.on(EventKeys.TIME_TICK).subscribe(this.increaseProgress)
+    
+
+  }
+
+  increaseProgress() {
+    this.currentSession.progress += 100/this.currentSession.duration
+    this.currentSession.elapsed++
+    if(this.currentSession.progress > 100) {
+      this.broadcastService.broadcast(EventKeys.PROGRESS_DONE, this.currentSession)
+      this.controller.stopTime()    
+    } else {
+      this.broadcastService.broadcast(EventKeys.PROGRESS_INCREASED, this.currentSession)
+    }
   }
 
   ngOnInit(): void {
 
+  }
+
+  startTime() {
+    this.currentSession.sessionStatus = SessionStatus.STARTED
+    this.controller.startTime()
+  }
+
+  stopTime() {
+    this.currentSession.sessionStatus = SessionStatus.STOPPED
+    this.broadcastService.broadcast(EventKeys.PROGRESS_DONE, this.currentSession)
+    this.controller.stopTime()
+  }
+
+  pauseTime() {
+    this.currentSession.sessionStatus = SessionStatus.PAUSED
+    this.controller.pauseTime()
   }
 
   get progressBarColor(): string {
