@@ -10,12 +10,16 @@
 
 <mat-card>
     <mat-card-title>
-        do
+        do {{currentSession.sessionType}} : 
+        {{currentSession.duration}} = 
+        {{currentSession.elapsed }} +
+        {{currentSession.duration - currentSession.elapsed}}
     </mat-card-title>
-    <mat-progress-bar [style.width.%]="80"
+    <mat-progress-bar 
+        [style.width.%]="this.progressBarWidth"
         mode = "determinate" 
-        value = 50 
-        color = "warn" 
+        value = {{this.currentSession.progress}} 
+        color = {{this.progressBarColor}} 
     >
     </mat-progress-bar>
     <br>

@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { ISettings } from 'src/app/modules/interfaces/interfaces';
+import { ISession, ISettings } from 'src/app/modules/interfaces/interfaces';
 import { BroadcastService, EventKeys } from '../broadcast/broadcast.service';
 
 enum StorageKeys {
@@ -22,6 +22,14 @@ export class StorageService {
     })
   }
 
+  getCurrentSession() {
+    const currentSessionStr: string | null = localStorage.getItem(StorageKeys.CURRENT_SESSION)
+    if(currentSessionStr){
+      return <ISession>JSON.parse(currentSessionStr)    
+  }
+  return null
+  }
+  
   getSettings() {
     const settingsStr: string | null = localStorage.getItem(StorageKeys.SETTINGS)
     if(settingsStr){

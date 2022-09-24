@@ -27,5 +27,8 @@ export class ControllerService {
     return this.storage.getSettings() || this.defaults.settings
   }
 
+  getCurrentSession() {
+    return this.storage.getCurrentSession() || this.defaults.session
+  }
 
 }
