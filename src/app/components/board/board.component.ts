@@ -29,7 +29,6 @@ class CurrentSession implements ICurrentSession {
     this.sessionMaxDuration = session.sessionMaxDuration
 
   }
-
 }
 
 @Component({

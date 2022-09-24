@@ -22,6 +22,10 @@ export class StorageService {
     })
   }
 
+  setCurrentSession(session:ISession) {
+    localStorage.setItem(StorageKeys.CURRENT_SESSION, JSON.stringify(session))
+  }
+
   deleteCurrentSession(): void {
     localStorage.removeItem(StorageKeys.CURRENT_SESSION)
   }

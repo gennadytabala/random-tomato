@@ -22,6 +22,13 @@ export class ControllerService {
     this.progressDone = this.progressDone.bind(this)
     this.broadcastService.on(EventKeys.PROGRESS_DONE).subscribe(this.progressDone)
 
+    this.progressIncreased = this.progressIncreased.bind(this)
+    this.broadcastService.on(EventKeys.PROGRESS_INCREASED).subscribe(this.progressIncreased)
+
+  }
+
+  private progressIncreased(session:ISession){
+    this.storage.setCurrentSession(session)
   }
 
   progressDone(){
