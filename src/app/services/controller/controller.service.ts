@@ -1,6 +1,7 @@
 import { Injectable } from '@angular/core';
 import { ISession, ISettings, SessionStatus, SessionType } from 'src/app/modules/interfaces/interfaces';
 import { BroadcastService, EventKeys } from '../broadcast/broadcast.service';
+import { CalculatorService } from '../calculator/calculator.service';
 import { DefaultsService } from '../defaults/defaults.service';
 import { StorageService } from '../storage/storage.service';
 import { TimerService } from '../timer/timer.service';
@@ -14,7 +15,8 @@ export class ControllerService {
     private defaults:DefaultsService,
     private storage:StorageService,
     private broadcastService: BroadcastService,
-    private timer: TimerService
+    private timer: TimerService,
+    private calculator: CalculatorService
   ) {
     this.saveSettings = this.saveSettings.bind(this)
     this.broadcastService.on(EventKeys.SETTINGS_SAVE_CLICKED).subscribe(this.saveSettings)
@@ -37,12 +39,22 @@ export class ControllerService {
   }
 
   getNextSession():ISession{
+    return this.calculator.calculate(
+      this.getSettings(),
+      this.getCurrentTimeSession())
+  }
+
+  getCurrentTimeSession():ISession {
+    return this.storage.getCurrentSession() || this.getDefaultTimeSession()
+  }
+
+  private getDefaultTimeSession():ISession{
     return {
-      sessionType: SessionType.REST,
+      sessionType: SessionType.WORK,
       sessionStatus: SessionStatus.STOPPED,
-      duration: 15,
-      progress: 0,
-      sessionMaxDuration: 20
+      duration: 30,
+      progress:0,
+      sessionMaxDuration: 30
     }
   }
 
