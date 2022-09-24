@@ -51,8 +51,14 @@ export class BoardComponent implements OnInit {
 
     this.increaseProgress = this.increaseProgress.bind(this)
     this.broadcastService.on(EventKeys.TIME_TICK).subscribe(this.increaseProgress)
-    
+  
+    this.setSession = this.setSession.bind(this)
+    this.broadcastService.on(EventKeys.SESSION_CHANGED).subscribe(this.setSession)
 
+  }
+
+  setSession(session:ISession){
+    this.currentSession = new CurrentSession(session)
   }
 
   increaseProgress() {
@@ -86,7 +92,7 @@ export class BoardComponent implements OnInit {
     this.controller.pauseTime()
   }
 
-  get progressBarColor(): string {
+  get progressBarColor(): string { //TODO: color do not change 
     return this.currentSession.sessionType === SessionType.WORK ? "warn" : "accent"
   }
 

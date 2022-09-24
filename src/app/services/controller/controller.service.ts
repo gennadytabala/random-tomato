@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { ISettings } from 'src/app/modules/interfaces/interfaces';
+import { ISession, ISettings, SessionStatus, SessionType } from 'src/app/modules/interfaces/interfaces';
 import { BroadcastService, EventKeys } from '../broadcast/broadcast.service';
 import { DefaultsService } from '../defaults/defaults.service';
 import { StorageService } from '../storage/storage.service';
@@ -19,6 +19,24 @@ export class ControllerService {
     this.saveSettings = this.saveSettings.bind(this)
     this.broadcastService.on(EventKeys.SETTINGS_SAVE_CLICKED).subscribe(this.saveSettings)
 
+    this.progressDone = this.progressDone.bind(this)
+    this.broadcastService.on(EventKeys.PROGRESS_DONE).subscribe(this.progressDone)
+
+  }
+
+  progressDone(){
+    const nextSession = this.getNextSession()
+    this.broadcastService.broadcast(EventKeys.SESSION_CHANGED, nextSession)
+  }
+
+  getNextSession():ISession{
+    return {
+      sessionType: SessionType.REST,
+      sessionStatus: SessionStatus.STOPPED,
+      duration: 15,
+      progress: 0,
+      sessionMaxDuration: 20
+    }
   }
 
   public startTime(){
