@@ -99,4 +99,17 @@ export class BoardComponent implements OnInit {
     const progressBarWidth = 100 / this.currentSession.sessionMaxDuration * this.currentSession.duration;
     return progressBarWidth.toString()
   }
+
+  buttonStartDisabled(): boolean {
+    return this.currentSession.sessionStatus === SessionStatus.STARTED
+  }
+  buttonStopDisabled(): boolean {
+    return this.currentSession.sessionStatus === SessionStatus.STOPPED
+  }
+  buttonPauseDisabled(): boolean {
+    return this.currentSession.sessionStatus === SessionStatus.PAUSED
+    ||
+    this.currentSession.sessionStatus === SessionStatus.STOPPED
+  }
+
 }

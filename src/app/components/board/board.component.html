@@ -1,10 +1,10 @@
-<button mat-button (click) = "startTime()">
+<button mat-button [disabled]="buttonStartDisabled()" (click)="startTime()">
     start
 </button>
-<button mat-button (click) = "pauseTime()">
+<button mat-button [disabled]="buttonPauseDisabled()" (click)="pauseTime()">
     pause
 </button>
-<button mat-button (click) = "stopTime()">
+<button mat-button [disabled]="buttonStopDisabled()" (click)="stopTime()">
     stop
 </button>
 
