@@ -14,6 +14,10 @@
                 <mat-label>max session time:</mat-label>
                 <input matInput formControlName="maxSessionTime">
             </mat-form-field>
+            <mat-form-field appearance="outline">
+                <mat-label>tick size:</mat-label>
+                <input matInput formControlName="tickSize">
+            </mat-form-field>
             <div>
                 <button mat-button color="primary" type="submit" [disabled]="!isFormValid()">
                     save

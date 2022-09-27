@@ -1,6 +1,7 @@
 import { Injectable } from '@angular/core';
 import { ISession, ISettings } from 'src/app/modules/interfaces/interfaces';
 import { BroadcastService, EventKeys } from '../broadcast/broadcast.service';
+import { DefaultsService } from '../defaults/defaults.service';
 
 enum StorageKeys {
   SETTINGS = "setttings",
@@ -13,7 +14,8 @@ enum StorageKeys {
 export class StorageService {
 
   constructor(
-    private broadcastService:BroadcastService
+    private broadcastService:BroadcastService,
+    private defaults: DefaultsService
   ) {
     this.broadcastService.broadcast(EventKeys.SESSION_CHANGED, {
       workPercent: 1,
@@ -44,7 +46,7 @@ export class StorageService {
     if(settingsStr){
         return <ISettings>JSON.parse(settingsStr)    
     }
-    return null
+    return this.defaults.settings
   }
 
   saveSettings(settings:ISettings) {

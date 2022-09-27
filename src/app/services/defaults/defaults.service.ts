@@ -15,7 +15,8 @@ export class DefaultsService {
   public settings: ISettings = {
     maxSessionTime:30,
     restPercent:20,
-    workPercent:80
+    workPercent:80,
+    tickSize:60
   } 
 
   public session: ISession = {

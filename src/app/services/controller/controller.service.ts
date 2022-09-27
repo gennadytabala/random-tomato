@@ -75,8 +75,8 @@ export class ControllerService {
     this.storage.saveSettings(settings)
   }
 
-  getSettings() : ISettings{
-    return this.storage.getSettings() || this.defaults.settings
+  getSettings() : ISettings{ //TODO move to storage because of circular deps in timer
+    return this.storage.getSettings()
   }
 
   getCurrentSession() {
