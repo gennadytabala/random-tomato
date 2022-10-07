@@ -9,7 +9,10 @@ export enum EventKeys {
   TIME_TICK,
   PROGRESS_INCREASED,
   PROGRESS_DONE,
-  SESSION_CHANGED 
+  SESSION_CHANGED,
+  TIMER_START,
+  TIMER_STOP,
+  TIMER_PAUSE 
 }
 
 export interface IBroadcastEvent {

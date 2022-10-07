@@ -1,4 +1,5 @@
 import { Component, OnInit } from '@angular/core';
+import { Observable, Subscription } from 'rxjs';
 import { ISession, SessionStatus, SessionType } from 'src/app/modules/interfaces/interfaces';
 import { BroadcastService, EventKeys } from 'src/app/services/broadcast/broadcast.service';
 import { ControllerService } from 'src/app/services/controller/controller.service';
@@ -39,6 +40,7 @@ class CurrentSession implements ICurrentSession {
 export class BoardComponent implements OnInit {
 
   currentSession: ICurrentSession
+  timeSubscription: Subscription | null = null
 
   constructor(
     private controller: ControllerService,
@@ -49,8 +51,7 @@ export class BoardComponent implements OnInit {
     this.currentSession = new CurrentSession(session)
 
     this.increaseProgress = this.increaseProgress.bind(this)
-    this.broadcastService.on(EventKeys.TIME_TICK).subscribe(this.increaseProgress)
-  
+    
     this.setSession = this.setSession.bind(this)
     this.broadcastService.on(EventKeys.SESSION_CHANGED).subscribe(this.setSession)
 
@@ -61,12 +62,16 @@ export class BoardComponent implements OnInit {
   }
 
   increaseProgress() {
-    this.currentSession.progress += 100/this.currentSession.duration
-    this.currentSession.elapsed++
-    if(this.currentSession.progress > 100) {
+    const progress = this.currentSession.progress + 100/this.currentSession.duration
+    const elapsed = Math.min(this.currentSession.elapsed + 1, this.currentSession.duration)
+    if(progress >= 100) {
+      this.currentSession.progress = 100
+      this.currentSession.elapsed = this.currentSession.duration
       this.broadcastService.broadcast(EventKeys.PROGRESS_DONE, this.currentSession)
       this.controller.stopTime()    
     } else {
+      this.currentSession.progress = progress
+      this.currentSession.elapsed = elapsed
       this.broadcastService.broadcast(EventKeys.PROGRESS_INCREASED, this.currentSession)
     }
   }
@@ -77,17 +82,23 @@ export class BoardComponent implements OnInit {
 
   startTime() {
     this.currentSession.sessionStatus = SessionStatus.STARTED
-    this.controller.startTime()
+    
+    this.timeSubscription = this.broadcastService.on(EventKeys.TIME_TICK).subscribe(this.increaseProgress)
+    this.broadcastService.broadcast(EventKeys.TIMER_START, "")
+
+    //this.controller.startTime()
   }
 
   stopTime() {
     this.currentSession.sessionStatus = SessionStatus.STOPPED
+    this.timeSubscription?.unsubscribe
     this.broadcastService.broadcast(EventKeys.PROGRESS_DONE, this.currentSession)
     this.controller.stopTime()
   }
 
   pauseTime() {
     this.currentSession.sessionStatus = SessionStatus.PAUSED
+    this.timeSubscription?.unsubscribe
     this.controller.pauseTime()
   }
 
@@ -96,7 +107,7 @@ export class BoardComponent implements OnInit {
   }
 
   get progressBarWidth(): string {
-    const progressBarWidth = 100 / this.currentSession.sessionMaxDuration * this.currentSession.duration;
+    const progressBarWidth = 100 / this.currentSession.sessionMaxDuration * Math.min(this.currentSession.duration,this.currentSession.sessionMaxDuration);
     return progressBarWidth.toString()
   }
 
