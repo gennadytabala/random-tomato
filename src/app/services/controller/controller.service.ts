@@ -59,7 +59,7 @@ export class ControllerService {
   }
 
   public startTime(){
-    this.timer.start()
+    //this.timer.start()
   }
 
   public pauseTime(){

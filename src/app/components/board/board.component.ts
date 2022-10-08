@@ -1,8 +1,9 @@
 import { Component, OnInit } from '@angular/core';
-import { Observable, Subscription } from 'rxjs';
+import { interval, Observable, Subscription } from 'rxjs';
 import { ISession, SessionStatus, SessionType } from 'src/app/modules/interfaces/interfaces';
 import { BroadcastService, EventKeys } from 'src/app/services/broadcast/broadcast.service';
 import { ControllerService } from 'src/app/services/controller/controller.service';
+import { StorageService } from 'src/app/services/storage/storage.service';
 
 interface ICurrentSession extends ISession {
   elapsed: number,
@@ -44,7 +45,8 @@ export class BoardComponent implements OnInit {
 
   constructor(
     private controller: ControllerService,
-    private broadcastService: BroadcastService
+    private broadcastService: BroadcastService,
+    private storage: StorageService
   ) {
 
     const session = this.controller.getCurrentSession()
@@ -61,14 +63,14 @@ export class BoardComponent implements OnInit {
     this.currentSession = new CurrentSession(session)
   }
 
-  increaseProgress() {
+  increaseProgress(val:any) {
+    console.log(`val ${val}`)
     const progress = this.currentSession.progress + 100/this.currentSession.duration
     const elapsed = Math.min(this.currentSession.elapsed + 1, this.currentSession.duration)
     if(progress >= 100) {
       this.currentSession.progress = 100
       this.currentSession.elapsed = this.currentSession.duration
-      this.broadcastService.broadcast(EventKeys.PROGRESS_DONE, this.currentSession)
-      this.controller.stopTime()    
+      this.stopTime()
     } else {
       this.currentSession.progress = progress
       this.currentSession.elapsed = elapsed
@@ -81,25 +83,30 @@ export class BoardComponent implements OnInit {
   }
 
   startTime() {
-    this.currentSession.sessionStatus = SessionStatus.STARTED
-    
-    this.timeSubscription = this.broadcastService.on(EventKeys.TIME_TICK).subscribe(this.increaseProgress)
-    this.broadcastService.broadcast(EventKeys.TIMER_START, "")
 
-    //this.controller.startTime()
+    const tickSize = this.storage.getSettings().tickSize
+    this.timeSubscription = interval(tickSize * 1000).subscribe(this.increaseProgress)
+
+    // this.currentSession.sessionStatus = SessionStatus.STARTED
+    
+    // this.timeSubscription = this.broadcastService.on(EventKeys.TIME_TICK).subscribe(this.increaseProgress)
+    // this.broadcastService.broadcast(EventKeys.TIMER_START, "")
+
+    // //this.controller.startTime()
   }
 
   stopTime() {
     this.currentSession.sessionStatus = SessionStatus.STOPPED
-    this.timeSubscription?.unsubscribe
+    this.timeSubscription?.unsubscribe()
+    //this.broadcastService.broadcast(EventKeys.TIMER_STOP,"")
     this.broadcastService.broadcast(EventKeys.PROGRESS_DONE, this.currentSession)
-    this.controller.stopTime()
+    //this.controller.stopTime()
   }
 
   pauseTime() {
     this.currentSession.sessionStatus = SessionStatus.PAUSED
-    this.timeSubscription?.unsubscribe
-    this.controller.pauseTime()
+    this.timeSubscription?.unsubscribe()
+    //this.controller.pauseTime()
   }
 
   get progressBarColor(): string { //TODO: color do not change 

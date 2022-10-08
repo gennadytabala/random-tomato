@@ -17,11 +17,7 @@ export class StorageService {
     private broadcastService:BroadcastService,
     private defaults: DefaultsService
   ) {
-    this.broadcastService.broadcast(EventKeys.SESSION_CHANGED, {
-      workPercent: 1,
-      restPercent: 99,
-      maxSessionTime: 5
-    })
+    
   }
 
   setCurrentSession(session:ISession) {
