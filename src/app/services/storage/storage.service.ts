@@ -5,7 +5,7 @@ import { DefaultsService } from '../defaults/defaults.service';
 
 enum StorageKeys {
   SETTINGS = "setttings",
-  CURRENT_SESSION = "currentSession"  
+  CURRENT_SESSION = "currentSession"
 }
 
 @Injectable({
@@ -14,13 +14,19 @@ enum StorageKeys {
 export class StorageService {
 
   constructor(
-    private broadcastService:BroadcastService,
+    private broadcastService: BroadcastService,
     private defaults: DefaultsService
   ) {
+    console.log('stor');
     
+    this.setCurrentSession = this.setCurrentSession.bind(this)
+    //this.broadcastService.on(EventKeys.PROGRESS_INCREASED).subscribe(this.setCurrentSession)
+
+    this.broadcastService.on(EventKeys.PROGRESS_INCREASED).subscribe(val => console.log(`incr st ${val}`))
+
   }
 
-  setCurrentSession(session:ISession) {
+  setCurrentSession(session: ISession) {
     localStorage.setItem(StorageKeys.CURRENT_SESSION, JSON.stringify(session))
   }
 
@@ -29,25 +35,29 @@ export class StorageService {
   }
 
 
-  getCurrentSession() {
+  getCurrentSession() : ISession{
     const currentSessionStr: string | null = localStorage.getItem(StorageKeys.CURRENT_SESSION)
-    if(currentSessionStr){
-      return <ISession>JSON.parse(currentSessionStr)    
+    if (currentSessionStr) {
+      return <ISession>JSON.parse(currentSessionStr)
+    }
+    return this.defaults.session //TODO avoid default session - calculate each session
   }
-  return null
-  }
-  
+
   getSettings() {
     const settingsStr: string | null = localStorage.getItem(StorageKeys.SETTINGS)
-    if(settingsStr){
-        return <ISettings>JSON.parse(settingsStr)    
+    if (settingsStr) {
+      return <ISettings>JSON.parse(settingsStr)
     }
     return this.defaults.settings
   }
 
-  saveSettings(settings:ISettings) {
-    localStorage.setItem(StorageKeys.SETTINGS, JSON.stringify(settings))
-    this.broadcastService.broadcast(EventKeys.SETTINGS_CHANGED, settings)  
+  saveSettings(settings: ISettings) {
+    const currentSettings = localStorage.getItem(StorageKeys.SETTINGS)
+    const newSettings = JSON.stringify(settings)
+    if(currentSettings !== newSettings) {
+      localStorage.setItem(StorageKeys.SETTINGS, newSettings)
+      this.broadcastService.broadcast(EventKeys.SETTINGS_CHANGED, settings)
+    }
   }
 
 }

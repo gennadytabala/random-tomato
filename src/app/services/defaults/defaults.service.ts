@@ -6,7 +6,7 @@ import { ISession, ISettings, SessionStatus, SessionType } from 'src/app/modules
 })
 export class DefaultsService {
 
-  public maxSessionDuration = 30
+  public maxSessionDuration = 10
   public sessionType = SessionType.WORK
   public sessionStatus = SessionStatus.STOPPED
   public sessionProgress = 0

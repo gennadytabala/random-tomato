@@ -1,8 +1,8 @@
 import { Component, OnInit } from '@angular/core';
 import { interval, Observable, Subscription } from 'rxjs';
-import { ISession, SessionStatus, SessionType } from 'src/app/modules/interfaces/interfaces';
+import { ISession, ISettings, SessionStatus, SessionType } from 'src/app/modules/interfaces/interfaces';
 import { BroadcastService, EventKeys } from 'src/app/services/broadcast/broadcast.service';
-import { ControllerService } from 'src/app/services/controller/controller.service';
+import { CalculatorService } from 'src/app/services/calculator/calculator.service';
 import { StorageService } from 'src/app/services/storage/storage.service';
 
 interface ICurrentSession extends ISession {
@@ -44,38 +44,63 @@ export class BoardComponent implements OnInit {
   timeSubscription: Subscription | null = null
 
   constructor(
-    private controller: ControllerService,
     private broadcastService: BroadcastService,
+    private calculator: CalculatorService,
     private storage: StorageService
   ) {
 
-    const session = this.controller.getCurrentSession()
+    const session = this.storage.getCurrentSession()
     this.currentSession = new CurrentSession(session)
 
     this.increaseProgress = this.increaseProgress.bind(this)
     
-    this.setSession = this.setSession.bind(this)
-    this.broadcastService.on(EventKeys.SESSION_CHANGED).subscribe(this.setSession)
+    this.setSettings = this.setSettings.bind(this)
+    this.broadcastService.on(EventKeys.SETTINGS_CHANGED).subscribe(this.setSettings)
 
   }
 
-  setSession(session:ISession){
+  setSettings(settings:ISettings) {
+    
+    this.currentSession.sessionStatus = SessionStatus.STOPPED
+    this.timeSubscription?.unsubscribe()
+    
+    const newSession = this.calculator.calculate(settings, this.currentSession)
+    
+    const newCurrentSession = new CurrentSession(newSession) // TODO add currSess propperties to ISess, kill currSess 
+    newCurrentSession.sessionType = this.currentSession.sessionType
+    newCurrentSession.elapsed = this.currentSession.elapsed
+    newCurrentSession.progress = newCurrentSession.duration/100 * newCurrentSession.elapsed
+    
+    this.currentSession = newCurrentSession
+    this.storage.setCurrentSession(this.currentSession)
+    
+    this.currentSession.sessionStatus = SessionStatus.STARTED
+    const tickSize = this.storage.getSettings().tickSize
+    this.timeSubscription = interval(tickSize * 1000).subscribe(this.increaseProgress)
+    
+  }
+
+  setSession(session: ISession) {
     this.currentSession = new CurrentSession(session)
+    this.pauseTime()
+    this.startTime()
   }
 
-  increaseProgress(val:any) {
-    console.log(`val ${val}`)
-    const progress = this.currentSession.progress + 100/this.currentSession.duration
+  increaseProgress() {
+    
+    const progress = this.currentSession.progress + 100 / this.currentSession.duration
     const elapsed = Math.min(this.currentSession.elapsed + 1, this.currentSession.duration)
-    if(progress >= 100) {
+    if (progress >= 100) {
       this.currentSession.progress = 100
       this.currentSession.elapsed = this.currentSession.duration
       this.stopTime()
+      //this.broadcastService.broadcast(EventKeys.PROGRESS_DONE, this.currentSession)
     } else {
       this.currentSession.progress = progress
       this.currentSession.elapsed = elapsed
       this.broadcastService.broadcast(EventKeys.PROGRESS_INCREASED, this.currentSession)
     }
+  
   }
 
   ngOnInit(): void {
@@ -83,30 +108,27 @@ export class BoardComponent implements OnInit {
   }
 
   startTime() {
-
+    this.currentSession = new CurrentSession(this.storage.getCurrentSession())
+    this.currentSession.sessionStatus = SessionStatus.STARTED
     const tickSize = this.storage.getSettings().tickSize
     this.timeSubscription = interval(tickSize * 1000).subscribe(this.increaseProgress)
-
-    // this.currentSession.sessionStatus = SessionStatus.STARTED
-    
-    // this.timeSubscription = this.broadcastService.on(EventKeys.TIME_TICK).subscribe(this.increaseProgress)
-    // this.broadcastService.broadcast(EventKeys.TIMER_START, "")
-
-    // //this.controller.startTime()
   }
 
   stopTime() {
+    
     this.currentSession.sessionStatus = SessionStatus.STOPPED
     this.timeSubscription?.unsubscribe()
-    //this.broadcastService.broadcast(EventKeys.TIMER_STOP,"")
-    this.broadcastService.broadcast(EventKeys.PROGRESS_DONE, this.currentSession)
-    //this.controller.stopTime()
+    
+    const newSession = this.calculator.calculate(this.storage.getSettings(), this.currentSession)
+    this.currentSession = new CurrentSession(newSession)
+    this.storage.setCurrentSession(this.currentSession)
+    
   }
 
   pauseTime() {
     this.currentSession.sessionStatus = SessionStatus.PAUSED
+    this.storage.setCurrentSession(this.currentSession)
     this.timeSubscription?.unsubscribe()
-    //this.controller.pauseTime()
   }
 
   get progressBarColor(): string { //TODO: color do not change 
@@ -114,7 +136,7 @@ export class BoardComponent implements OnInit {
   }
 
   get progressBarWidth(): string {
-    const progressBarWidth = 100 / this.currentSession.sessionMaxDuration * Math.min(this.currentSession.duration,this.currentSession.sessionMaxDuration);
+    const progressBarWidth = 100 / this.currentSession.sessionMaxDuration * Math.min(this.currentSession.duration, this.currentSession.sessionMaxDuration);
     return progressBarWidth.toString()
   }
 
@@ -126,8 +148,8 @@ export class BoardComponent implements OnInit {
   }
   buttonPauseDisabled(): boolean {
     return this.currentSession.sessionStatus === SessionStatus.PAUSED
-    ||
-    this.currentSession.sessionStatus === SessionStatus.STOPPED
+      ||
+      this.currentSession.sessionStatus === SessionStatus.STOPPED
   }
 
 }

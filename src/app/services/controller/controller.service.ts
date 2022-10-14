@@ -34,6 +34,8 @@ export class ControllerService {
   }
 
   progressDone(){
+    console.log(`contrpller progress done`);
+    
     const nextSession = this.getNextSession()
     this.broadcastService.broadcast(EventKeys.SESSION_CHANGED, nextSession)
   }

@@ -2,8 +2,8 @@ import { Component, OnInit } from '@angular/core';
 import { FormBuilder, FormControl, FormGroup, Validators } from '@angular/forms';
 import { ISettings } from 'src/app/modules/interfaces/interfaces';
 import { BroadcastService, EventKeys } from 'src/app/services/broadcast/broadcast.service';
-import { ControllerService } from 'src/app/services/controller/controller.service';
 import { DefaultsService } from 'src/app/services/defaults/defaults.service';
+import { StorageService } from 'src/app/services/storage/storage.service';
 
 @Component({
   selector: 'app-settings',
@@ -12,16 +12,16 @@ import { DefaultsService } from 'src/app/services/defaults/defaults.service';
 })
 export class SettingsComponent implements OnInit {
 
-  private _settings: ISettings //TODO remove it?
+  //private _settings: ISettings //TODO remove it?
   settingsForm: FormGroup | null = null
 
   constructor(
     private formBuilder: FormBuilder,
-    private controller: ControllerService,
+    private storage: StorageService,
     private broadcastService: BroadcastService,
     private defaults: DefaultsService
   ) {
-    this._settings = this.defaults.settings
+    //this._settings = this.defaults.settings
     this.updateSettings = this.updateSettings.bind(this)
     this.broadcastService.on(EventKeys.SETTINGS_CHANGED).subscribe(this.updateSettings)
   }
@@ -63,7 +63,7 @@ export class SettingsComponent implements OnInit {
       maxSessionTime: +(this.settingsForm?.value.maxSessionTime),
       tickSize: +(this.settingsForm?.value.tickSize)
     }
-    this.broadcastService.broadcast(EventKeys.SETTINGS_SAVE_CLICKED, settings)
+    this.storage.saveSettings(settings)
   }
 
   isFormValid() {
@@ -79,7 +79,7 @@ export class SettingsComponent implements OnInit {
       tickSize: new FormControl({}, Validators.required)
     }
 
-    const settings = this.controller.getSettings()
+    const settings = this.storage.getSettings()
 
     const formState = {
       workPercent: {
